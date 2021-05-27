@@ -282,7 +282,7 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   cl<-contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
   shp <- maptools::ContourLines2SLDF(cl)
   #Build a SpatialPointsData Frame
-  proj4string(shp)<-sp::CRS("+proj=longlat +datum=WGS84")   # this specifies the WGS84 datum for maps, and may not work with as much precision when plotted on older topographic maps (errors as much as 100's of meters)
+  sp::proj4string(shp)<-sp::CRS("+proj=longlat +datum=WGS84")   # this specifies the WGS84 datum for maps, and may not work with as much precision when plotted on older topographic maps (errors as much as 100's of meters)
   # Create a kml file that can be opened in Google Earth or CalTopo
   i=1
   if(file.exists(paste(filename,".kml",sep=""))){
