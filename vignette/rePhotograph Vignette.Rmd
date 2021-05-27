@@ -36,10 +36,7 @@ install_github("MatthewGilbertUCD/rePhoto")
 require(rePhoto)
 ```
 
-The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. The rePhoto installation may install these packages, if not you can do it yourself:
-
-install.packages("https://cran.r-project.org/src/contrib/maptools_1.1-1.tar.gz", repos=NULL)  
-install.packages("https://cran.r-project.org/src/contrib/rgdal_1.5-23.tar.gz", repos=NULL)
+The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. You'll need to install them from the CRAN website: [here](https://cran.r-project.org/)  
 
 The Rtools package may be needed for these installations: [here](https://cran.rstudio.com/bin/windows/Rtools/). 
 Load the packages to your R environment:
