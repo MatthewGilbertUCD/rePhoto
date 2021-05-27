@@ -39,11 +39,7 @@ require(rePhoto)
 The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. You'll need to install them from the CRAN website: [here](https://cran.r-project.org/)  
 
 The Rtools package may be needed for these installations: [here](https://cran.rstudio.com/bin/windows/Rtools/). 
-Load the packages to your R environment:
-```{r require,results="hide",message=FALSE, warning=FALSE}
-require(maptools)
-require(rgdal)
-```
+
 You should now be all set to go. 
 
 ### Step 2: Data input
