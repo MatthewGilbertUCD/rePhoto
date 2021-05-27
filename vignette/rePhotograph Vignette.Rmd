@@ -1,0 +1,172 @@
+---
+title: "rePhoto vignette"
+author: "Matthew Gilbert"
+date: "5/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+source("Functions.R", local = knitr::knit_global())
+```
+
+## A demostration of the functions for the rePhoto R package
+Developed by Matthew Gilbert (megilbert at ucdavis dot edu) 5/2021   
+
+### Introduction
+
+The rePhoto package has functions for applying a geometric method for calculating probable locations at which a historical photograph is likely to be found. 
+
+This code accompanies a unpublished manuscript: METHODS FOR FINDING THE LOCATION OF HISTORICAL PHOTOGRAPHS FOR REPEAT PHOTOGRAPHY 
+
+The general principle is that a value called a Theta difference is close to zero at the location of a historical photograph. The outputs are a plot of contours of similar Theta differences, the smaller the difference the more likely that the location corresponds with the historical photograph location.
+Theta differences are a value that represents the difference between distances measured on a photograph and those on a map. Theta for the photograph is calculated from distances between X pixel coordinates measured using Microsoft Paint, ImageJ or other image analysis software (see Fig. 1).  
+Theta for the map is calculated from geographic coordinates (latitude and longitude) measured with GIS software such as Google Maps, Google Earth, CalTopo etc. The difficulty is finding at least three points of reference in a photograph that can also be found on a map/satellite photograph. 
+
+### Step 1: Set up R environment
+
+Download and install the rePhoto package from GitHub [here](https://github.com/MatthewGilbertUCD/rePhoto.git). You can do this in R with the following commands, these require the devtools package:
+
+```{r setup2,results="hide",message=FALSE, warning=FALSE}
+require(devtools)
+install_github("MatthewGilbertUCD/rePhoto")
+require(rePhoto)
+```
+
+The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. The rePhoto installation may install these packages, if not you can do it yourself:
+
+install.packages("https://cran.r-project.org/src/contrib/maptools_1.1-1.tar.gz", repos=NULL)  
+install.packages("https://cran.r-project.org/src/contrib/rgdal_1.5-23.tar.gz", repos=NULL)
+
+The Rtools package may be needed for these installations: [here](https://cran.rstudio.com/bin/windows/Rtools/). 
+Load the packages to your R environment:
+```{r require,results="hide",message=FALSE, warning=FALSE}
+require(maptools)
+require(rgdal)
+```
+You should now be all set to go. 
+
+### Step 2: Data input
+
+Input consists of a data frame with three or four rows of data, each row representing a point of reference in a photograph (Fig. 1). The data frame needs three columns representing: the X pixel coordinate of a point of reference in a historical photograph and the corresponding latitude (Lat) and longitude (Long) of the same point of reference.
+
+![Fig. 1 An example of a photograph at Butte Lake, Lassen National Park, with unknown camera position. Each circle indicates a point of reference with known horizontal distances between points (derived from the X pixel values found in Microsoft Paint) and known geographical location (latitude and longitude from Google Maps)](ExampleForVignette.png)
+
+For the example in Fig. 1 the X, Lat and Long columns would be:
+```{r dataentrya}
+X=c(1817.5,2976,2981.5,4133.5) # corresponding to the X pixel value in the original photograph
+Lat=c(40.5626732036708,40.5572747839369,40.5521645296348,40.5538526778492) 
+Long=c(-121.2881588081880,-121.2863588017280,-121.2840814300800,-121.2866216468020) 
+```
+Combine them into a data frame and view the result:
+```{r dataentryb}
+data1=data.frame(X,Lat,Long)
+data1
+```
+Note: dput(data1) gives the full resolution of the values. 
+The data can also be entered via a file or clipboard: 
+```{r dataentryc, eval=FALSE}
+data1=read.csv(file="yourfilename.csv") # file in the format above
+# or
+data1=read.table(‘clipboard’) # clipboard in the format above
+```
+
+
+### Step 3: Run the core rePhotograph function
+The core rePhotograph function evaluates a large grid of possible locations that the historical photograph could occur. Depending upon settings this can take some time (1 to 10 seconds or more).
+```{r rephotograph}
+out <- rePhotograph(data1,PtDensity=1000)
+```
+‘out’ is the grid evaluated with values for latitude and longitude, and a series of values that relate to how likely the photograph was taken at that each of those grid locations, for instance here are the first five locations:
+```{r outputeg}
+out[1:5,] 
+```
+The diff1 and diff2 values correspond to the Theta differences using the first three points or the first, third and fourth points. diffcomb is the geometric mean of diff1 and diff2 (if you only supply three points diff2 is not used). If the location is excluded due to camera angle or order of points, then diffcomb is assigned a value of 1 i.e. it won't be included in the final search area. 
+
+### Step 4: View the contours in R plot
+```{r contours}
+plot.search.area(data1,out)
+```
+
+### Step 5: Output probable search area as KML file
+You can create a KML file with a contour showing likely search areas for the original photograph:
+```{r KML}
+outputKML(out,filename="MyFileName1")
+```
+
+### Step 6: Make adjustments to settings
+The functions run well with the default settings, but not always.
+In the above example, it is clear that the photograph is on the north western side of the grid. We could choose to evaluate a smaller region for possible locations by changing the *grid* default range with a specific range of latitudes and longitudes:
+```{r new1}
+out2=rePhotograph(data1,grid=c(40.550,40.570,-121.300,-121.280),PtDensity=1000)
+```
+The *scaleToSearch* default is 2 and signifies that a range of latitudes and longitudes will be evaluated at *twice* the range of the points of reference. By setting a range with the *grid* setting the *scaleToSearch* setting is overridden.
+We can see the new range by replotting the output:
+```{r new2}
+plot.search.area(data1,out2)
+```
+
+An alternative to setting the grid is to set the scaleToSearch at a different value e.g. 10 would evaluate a 5 times broader region than the default of 2. 
+
+The other default values can be adjusted:  
+*PtDensity* = 1500 changes the resolution of the grid evaluated, but values >1000 can lead to long processing times >10 seconds (default value 1000: a grid of 1000x1000 locations).   
+*UseOrder* = FALSE disables the use of the order of the points of reference (default TRUE). In Fig. 1 the order of points a,b,c,d from left to right is distinctive. If a location had a different order then it would be excluded if UseOrder=TRUE.  
+*CameraLens* = 45 readjusts the function to only include locations where the points of reference are less than 45 degrees i.e. to be in the frame of a camera lens with 45 degree field of view (default 90 degrees).  
+
+```{r new3}
+out3=rePhotograph(data1,scaleToSearch=2,grid=c(40.550,40.570,-121.300,-121.280),
+                        PtDensity=1500,
+                        UseOrder=TRUE,
+                        CameraLens=45)
+```
+
+We can replot the analysis, this time using the extrapoints input to add a reference point, in this case a distinctive feature of the lake shore.
+```{r new4}
+plot.search.area(data1,out3,extrapoints=data.frame(Lat=40.5661999192325,Long= -121.29090890479985),title="Butte Lake")
+```
+
+In the plot, it seems that some locations are a very close match (Thetadiff<0.01), thus the threshold could be updated to narrow the region output in the KML contour
+
+```{r new5}
+outputKML(out3,filename="MyFileName2",Thres = 0.01)
+```
+
+I encourage you to go see how closely the region in the KML file corresponds with the actual photograph.  
+
+### Opening KML files
+
+KML files can be opened in a number of software, here are instructions for CalTopo and Google Earth.  
+
+#### CalTopo
+1. Go to [https://caltopo.com/map.html](https://caltopo.com/map.html)   
+1. On the left tab select *Import*  
+1. Choose your KML file in its folder
+1. Select *Import*
+1. CalTopo doesn't automatically pan to the KML contour lines, so you'll have to navigate to the location the KML file is plotting. e.g. enter some coordinates
+1. The right tab on CalTopo allows you to change your base layer to historical maps or satellite photographs, and create printable maps detailing the search area for the camera location
+
+#### Google Earth
+1. Go to [https://earth.google.com/](https://earth.google.com/)   
+1. *Launch* Google Earth
+1. Click on the three horizontal bars in the upper left corner
+1. Select *Projects*
+1. Select *New Project*
+1. Select *Import KML file from computer*
+1. Browse the folders to fine your KML file
+1. Select *Open*
+1. The view will pan to the location of the KML file. 
+  
+### Conclusions
+
+To read more about this technique see:
+Link to paper will be added when published
+
+The following websites have vast databases of landscape photographs to which this technique can be applied:  
+[https://calisphere.org/](https://calisphere.org/) 
+[https://www.loc.gov/collections/](https://www.loc.gov/collections/)  
+[http://vtm.berkeley.edu/#/data/photos](http://vtm.berkeley.edu/#/data/photos)  
+[https://www.nps.gov/media/multimedia-search.htm](https://www.nps.gov/media/multimedia-search.htm)  
+
