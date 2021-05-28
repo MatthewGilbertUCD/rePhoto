@@ -248,7 +248,7 @@ plot.search.area<-function(data1,out,extrapoints=data.frame(Lat=0,Long=0),title=
     )
   }else{
     filled.contour(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(0.001,0.01,0.05,0.1,0.2,0.99),
-                   plot.title = title,xlab="Longitude",ylab="Latitude",main=title,
+                   plot.title = title(xlab="Longitude",ylab="Latitude",main=title),
                    key.title="abs(Thetaphoto-Thetamap)",
                    key.axes=axis(4,at=c(0.001,0.01,0.05,0.1,0.2,0.99)),
                    plot.axes = {points(data1$Long,data1$Lat,pch=3,lwd=2);
