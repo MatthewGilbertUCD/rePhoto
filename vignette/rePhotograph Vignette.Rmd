@@ -117,6 +117,7 @@ We can replot the analysis, this time using the *extrapoints* input to add a kno
 ```{r new4}
 plot.search.area(data1,out3,extrapoints=data.frame(Lat=40.5661999192325,Long= -121.29090890479985),title="Butte Lake")
 ```
+
 The *extrapoints* input can take single values or vectors of locations (e.g. Lat=c(1,2,3,4)).
 In the plot, it seems that some locations are a very close match (Theta differences < 0.01), thus the contour threshold could be updated to narrow the region output in the KML contour:
 
