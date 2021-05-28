@@ -9,10 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, include=FALSE}
-source("Functions.R", local = knitr::knit_global())
-```
-
 ## A demostration of the functions for the rePhoto R package
 Developed by Matthew Gilbert (megilbert at ucdavis dot edu) 5/2021   
 
