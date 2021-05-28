@@ -18,7 +18,7 @@ The rePhoto package has functions for applying a geometric method for calculatin
 
 This code accompanies a unpublished manuscript: METHODS FOR FINDING THE LOCATION OF HISTORICAL PHOTOGRAPHS FOR REPEAT PHOTOGRAPHY 
 
-The general principle is that a value called a **Theta difference** is close to zero at the location of a historical photograph. The outputs are a plot of contours of similar Theta differences, the smaller the difference the more likely that the location corresponds with the historical photograph location.
+The general principle is that a value called a *Theta difference* is close to zero at the location of a historical photograph. The outputs are a plot of contours of similar Theta differences, the smaller the difference the more likely that the location corresponds with the historical photograph location.
 *Theta differences* are a value that represents the difference between distances measured on a photograph and those on a map. *Theta* for the photograph is calculated from distances between X pixel coordinates measured using Microsoft Paint, ImageJ or other image analysis software (see Fig. 1).  
 *Theta* for the map is calculated from geographic coordinates (latitude and longitude) measured with GIS software such as Google Maps, Google Earth, CalTopo etc. The difficulty is finding at least three points of reference in a photograph that can also be found on a map/satellite photograph. 
 
@@ -101,9 +101,9 @@ plot.search.area(data1,out2)
 An alternative to setting the grid is to set the *scaleToSearch* at a different value e.g. 10 would evaluate a 5 times broader region than the default of 2. 
 
 The other default values can be adjusted:  
-*PtDensity* = 1500 changes the resolution of the grid evaluated, but values >1000 can lead to long processing times >10 seconds (default value 1000: a grid of 1000x1000 locations).   
-*UseOrder* = FALSE disables the use of the order of the points of reference (default TRUE). In Fig. 1 the order of points a,b,c,d from left to right is distinctive. If a location had a different order then it would be excluded if *UseOrder*=TRUE. When called by rePhotograph(), the workhorse function LineResid() evaluates if the order is correct.  
-*CameraLens* = 45 readjusts the outputs to only include locations where the points of reference are within an angle from that location of less than 45 degrees i.e. to be in the frame of a camera lens with 45 degree field of view (default 90 degrees).  
+*  *PtDensity* = 1500 changes the resolution of the grid evaluated, but values >1000 can lead to long processing times >10 seconds (default value 1000: a grid of 1000x1000 locations).   
+*  *UseOrder* = FALSE disables the use of the order of the points of reference (default TRUE). In Fig. 1 the order of points a,b,c,d from left to right is distinctive. If a location had a different order then it would be excluded if *UseOrder*=TRUE. When called by rePhotograph(), the workhorse function LineResid() evaluates if the order is correct.  
+*  *CameraLens* = 45 readjusts the outputs to only include locations where the points of reference are within an angle from that location of less than 45 degrees i.e. to be in the frame of a camera lens with 45 degree field of view (default 90 degrees).  
 
 We can run this:
 ```{r new3}
