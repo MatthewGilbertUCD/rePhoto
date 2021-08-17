@@ -1,7 +1,7 @@
 ---
 title: "rePhoto vignette"
 author: "Matthew Gilbert"
-date: "5/20/2021"
+date: "8/17/2021"
 output: html_document
 ---
 
@@ -9,22 +9,29 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, include=FALSE}
+source("rePhotoFunctions.R", local = knitr::knit_global())
+```
+
 ## A demostration of the functions for the rePhoto R package
-Developed by Matthew Gilbert (megilbert at ucdavis dot edu) 5/2021   
+Developed by Matthew Gilbert (megilbert at ucdavis dot edu)   
 
 ### Introduction
 
-The rePhoto package has functions for applying a geometric method for calculating probable locations at which a historical photograph is likely to be found. 
+You have a historical photograph and want to re-photograph it from the same location as the original. But how do you find the original camera location? The rePhoto package has functions that apply a geometric method to calculate probable search areas for the original camera location. 
 
-This code accompanies a unpublished manuscript: METHODS FOR FINDING THE LOCATION OF HISTORICAL PHOTOGRAPHS FOR REPEAT PHOTOGRAPHY 
+This code accompanies a currently unpublished manuscript: METHODS FOR FINDING THE LOCATION OF HISTORICAL PHOTOGRAPHS FOR REPEAT PHOTOGRAPHY 
 
-The general principle is that a value called a *Theta difference* is close to zero at the location of a historical photograph. The outputs are a plot of contours of similar Theta differences, the smaller the difference the more likely that the location corresponds with the historical photograph location.
-*Theta differences* are a value that represents the difference between distances measured on a photograph and those on a map. *Theta* for the photograph is calculated from distances between X pixel coordinates measured using Microsoft Paint, ImageJ or other image analysis software (see Fig. 1).  
-*Theta* for the map is calculated from geographic coordinates (latitude and longitude) measured with GIS software such as Google Maps, Google Earth, CalTopo etc. The difficulty is finding at least three points of reference in a photograph that can also be found on a map/satellite photograph. 
+Functions in the package take inputs of user specified geographic points in an image and the latitude and longitude of those points. The functions output a predicted search area; see examples below.
+It is unnecessary to understand the calculations involved, but the general principle is that a value called a Theta difference is close to zero at the original camera location of a historical photograph. Package functions output a plot of contours of similar Theta differences, the smaller the difference the more likely that the location corresponds with the historical photograph location.
+Theta differences are a value that represents the difference between distances measured on a photograph and those on a map. Theta for the photograph is calculated from distances between X pixel coordinates measured using Microsoft Paint, ImageJ or other image analysis software (see Fig. 1).  
+Theta for the map is calculated from geographic coordinates (latitude and longitude) measured with GIS software such as Google Maps, Google Earth, CalTopo etc. The difficulty is finding at least three points of reference in a photograph that can also be found on a map/satellite photograph. 
 
 ### Step 1: Set up R environment
 
-Download and install the rePhoto package from GitHub [here](https://github.com/MatthewGilbertUCD/rePhoto.git). You can do this in R with the following commands, these require the devtools package:
+If you haven't already, download and install R: [here](https://cran.r-project.org/)
+
+Download and install the rePhoto package from GitHub [here](https://github.com/MatthewGilbertUCD/rePhoto.git). You can do this in R with the following commands, these require the devtools package (instructions can be found [here](https://cran.r-project.org/web/packages/devtools/readme/README.html)):
 
 ```{r setup2,results="hide",message=FALSE, warning=FALSE}
 require(devtools)
@@ -32,15 +39,15 @@ install_github("MatthewGilbertUCD/rePhoto")
 require(rePhoto)
 ```
 
-The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. You'll need to install them from the CRAN website: [here](https://cran.r-project.org/)  
+The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. If you want to output KML files for viewing in Google Earth, you'll need to install these packages from the CRAN website: [here](https://cran.r-project.org/)  
 
 The Rtools package may be needed for these installations: [here](https://cran.rstudio.com/bin/windows/Rtools/). 
 
-You should now be all set to go. 
+Having installed these you should now be all set to go. 
 
 ### Step 2: Data input
 
-Input consists of a data frame with three or four rows of data, each row representing a point of reference in a photograph (a-d in Fig. 1). The data frame needs three columns representing: the X pixel coordinate of a point of reference in a historical photograph and the corresponding latitude (Lat) and longitude (Long) of the same point of reference.
+Input consists of a data frame with three or four rows of data, each row representing a point of reference in a photograph (Fig. 1). The data frame needs three columns representing: the X pixel coordinate of a point of reference in a historical photograph and the corresponding latitude (Lat) and longitude (Long) of the same point of reference.
 
 ![Fig. 1 An example of a photograph at Butte Lake, Lassen National Park, with unknown camera position. Each circle indicates a point of reference with known horizontal distances between points (derived from the X pixel values found in Microsoft Paint) and known geographical location (latitude and longitude from Google Maps)](ExampleForVignette.png)
 
@@ -65,47 +72,51 @@ data1=read.table(‘clipboard’) # clipboard in the format above
 
 
 ### Step 3: Run the core rePhotograph function
-The core rePhotograph function evaluates a large grid of possible locations that the historical photograph could occur. Depending upon settings this can take some time (1 to 10 seconds or more).
+The core rePhotograph function evaluates a large grid of possible locations from which the  historical photograph could have been taken. Depending upon settings this function can take some time (1 to 10 seconds or more).
 ```{r rephotograph}
 out <- rePhotograph(data1,PtDensity=1000)
 ```
-*out* is the grid evaluated with values for latitude and longitude, and a some values that relate to how likely is is that the photograph was taken at that grid location. For instance here are the first five locations:
+‘out’ is the grid evaluated with values for latitude and longitude, and a series of values that relate to how likely the photograph was taken at that each of those grid locations, for instance here are the first five locations:
 ```{r outputeg}
 out[1:5,] 
 ```
-The *diff1* and *diff2* values correspond to the Theta differences using the first three points or the first, third and fourth points. *diffcomb* is the geometric mean of *diff1* and *diff2* (if you only supply three points *diff2* is not used). If the location is excluded due to camera angle or order of points, then *diffcomb* is assigned a value of 1 i.e. it won't be included in the final search area. 
+'diff1' corresponds to the Theta difference using the first three points, 'diff2' corresponds to the Theta difference using the first, third and fourth points (if four points were supplied). 'diffcomb' is the geometric mean of 'diff1' and 'diff2' (if you only supply three points 'diff2' is not used). For advanced use (explained below): if the location is excluded due to camera angle or order of points, then 'diffcomb' is assigned a value of 1 i.e. it won't be included in the final search area. 
 
 ### Step 4: View the contours in R plot
 ```{r contours}
 plot.search.area(data1,out)
 ```
 
+The contour plot provides a visual output, indicating the location of the points of reference (+'s) supplied in 'data1', and contours of areas that vary in Theta difference. A low Theta difference (light colors) represent more likely locations for the original camera position. The white areas are areas excluded based upon advanced criteria such as the order of points of reference in the original photograph and camera lens maximum angle.   
+
 ### Step 5: Output probable search area as KML file
-You can create a KML file with a contour showing likely search areas for the original photograph:
+You can create a KML file with a contour showing likely search areas for the camera location of the original photograph:
 ```{r KML}
 outputKML(out,filename="MyFileName1")
 ```
+The KML file can be opened in Google Earth or CalTopo and compared to satellite photographs or topographic maps. 
 
 ### Step 6: Make adjustments to settings
-The functions generally run well with the default settings, but not always. 
-In the last analysis, the *scaleToSearch* was the default value of 2 and signifies that a range of latitudes and longitudes was evaluated at *twice* the range of the points of reference. But it is clear that the original photograph was taken from the north western side of the grid. We override the *scaleToSearch* by setting a range with the *grid* setting allowing us to evaluate a smaller region within a specific range of latitudes and longitudes:
+The functions run well with the default settings, but not always.
+In the above example, it is clear that the photograph original location is likely on the north western side of the grid. The area searched was set by the default *scaleToSearch*=2 setting, signifying that a range of latitudes and longitudes should be evaluated at *twice* the range of the points of reference. We could change this value to change the region searched i.e. a larger region *scaleToSearch*=3. 
+```{r new0}
+out2=rePhotograph(data1,scaleToSearch=3,PtDensity=1000)
+```
+Or we could choose to evaluate a specific range of latitudes and longitudes for possible locations by using the *grid* setting:
 ```{r new1}
 out2=rePhotograph(data1,grid=c(40.550,40.570,-121.300,-121.280),PtDensity=1000)
 ```
-
+Note:setting *grid* values masks *scaleToSearch*. 
 We can see the new range by replotting the output:
 ```{r new2}
 plot.search.area(data1,out2)
 ```
 
-An alternative to setting the grid is to set the *scaleToSearch* at a different value e.g. 10 would evaluate a 5 times broader region than the default of 2. 
-
 The other default values can be adjusted:  
-*  *PtDensity* = 1500 changes the resolution of the grid evaluated, but values >1000 can lead to long processing times >10 seconds (default value 1000: a grid of 1000x1000 locations).   
-*  *UseOrder* = FALSE disables the use of the order of the points of reference (default TRUE). In Fig. 1 the order of points a,b,c,d from left to right is distinctive. If a location had a different order then it would be excluded if *UseOrder*=TRUE. When called by rePhotograph(), the workhorse function LineResid() evaluates if the order is correct.  
-*  *CameraLens* = 45 readjusts the outputs to only include locations where the points of reference are within an angle from that location of less than 45 degrees i.e. to be in the frame of a camera lens with 45 degree field of view (default 90 degrees).  
-
-We can run this:
+*PtDensity* changes the resolution of the grid evaluated, but values >1000 can lead to long processing times >10 seconds (default value 1000: a grid of 1000x1000 locations).   
+*UseOrder* = FALSE disables the use of the order of the points of reference as a criteria for the search area (default TRUE). In Fig. 1 the order of points a,b,c,d from left to right is distinctive. If a location had a different order then it would be excluded if UseOrder=TRUE.  
+*CameraLens* = 45 readjusts the function to only include locations where the points of reference are less than 45 degrees i.e. to be in the frame of a camera lens with 45 degree field of view (default 90 degrees).  
+Putting these together:
 ```{r new3}
 out3=rePhotograph(data1,grid=c(40.550,40.570,-121.300,-121.280),
                         PtDensity=1500,
@@ -113,14 +124,12 @@ out3=rePhotograph(data1,grid=c(40.550,40.570,-121.300,-121.280),
                         CameraLens=45)
 ```
 
-We can replot the analysis, this time using the *extrapoints* input to add a known location, in this case a distinctive feature of the lake shore. *title* allows us to annotate the plot with a unique label.
+We can replot the analysis, this time using the *extrapoints* input to add reference points, in this case a distinctive feature of the lake shore (will be shown as a purple circle).
 ```{r new4}
-plot.search.area(data1,out3,extrapoints=data.frame(Lat=40.5661999192325,Long= -121.29090890479985),title="Butte Lake")
+plot.search.area(data1,out3,extrapoints=data.frame(Lat=40.5661999192325,Long= -121.29090890479985))
 ```
 
-The *extrapoints* input can take single values or vectors of locations (e.g. Lat=c(1,2,3,4)).
-In the plot, it seems that some locations are a very close match (*Theta differences* < 0.01), thus the contour threshold could be updated to narrow the region output in the KML contour:
-
+In the plot, it seems that some locations are a very close match (Thetadiff<0.01), thus the threshold could be updated to narrow the region output in the KML contour:
 ```{r new5}
 outputKML(out3,filename="MyFileName2",Thres = 0.01)
 ```
@@ -160,4 +169,3 @@ The following websites have vast databases of landscape photographs to which thi
 [https://www.loc.gov/collections/](https://www.loc.gov/collections/)  
 [http://vtm.berkeley.edu/#/data/photos](http://vtm.berkeley.edu/#/data/photos)  
 [https://www.nps.gov/media/multimedia-search.htm](https://www.nps.gov/media/multimedia-search.htm)  
-
