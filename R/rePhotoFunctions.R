@@ -279,7 +279,7 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   matr=t(matr)
   colnames(matr)=unique(out$Long)
   rownames(matr)=unique(out$Lat)
-  cl<-contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
+  cl<-grDevices::contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
   
   # the following code converts the contourlines into a dataframe, then into a Spaltial Lines DataFrame object (shp).
   # note that this code can be replaced with the maptools::ContourLines2SLDF(cl) function, but has been replaced as maptools is due for retirement
