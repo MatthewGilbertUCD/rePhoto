@@ -265,11 +265,11 @@ plot.search.area<-function(data1,out,extrapoints=data.frame(Lat=0,Long=0),title=
 #' @description A function for output of a KML file for use with GIS software. The KML file shows a contour encompassing a search area for the location of the camera in the original photograph.
 #' @usage outputKML(out,filename="yourfilename",Thres=0.05)
 #' @param out the output of rePhotograph()
-#' @param filename the name of the output KML file  
-#' @param Thres the threshold for the contour output i.e. the default, Thres = 0.05, includes in the contour all locations that have a out$diffcomb < 0.05. This value can be adjusted based upon the regions shown in plot.search.area()   
+#' @param filename the name of the output KML file
+#' @param Thres the threshold for the contour output i.e. the default, Thres = 0.05, includes in the contour all locations that have a out$diffcomb < 0.05. This value can be adjusted based upon the regions shown in plot.search.area()
 #' @details This function requires functions from the sp, rgdal and maptools packages
 #' @import sp, rgdal, maptools
-#' @return A KML file that can be opened in Google Earth, CalTopo etc 
+#' @return A KML file that can be opened in Google Earth, CalTopo etc
 #' @examples see rePhotograph vignette
 outputKML<-function(out,filename="yourfilename",Thres=0.05){
   # Export contour lines to polygon then shape file .kml
@@ -281,7 +281,7 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   rownames(matr)=unique(out$Lat)
   cl<-contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
   
-  # the following code converts the contourlines into a dataframe, then into a SpatialLinesDataFrame object (shp).
+  # the following code converts the contourlines into a dataframe, then into a Spaltial Lines DataFrame object (shp).
   # note that this code can be replaced with the maptools::ContourLines2SLDF(cl) function, but has been replaced as maptools is due for retirement
   # sourced from here: https://stackoverflow.com/questions/24284356/convert-spatialpointsdataframe-to-spatiallinesdataframe-in-r
   
@@ -296,6 +296,7 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
       clout=rbind(clout,cltemp)
     }
   }
+  
   sp::coordinates(clout) <- ~x+y
   sclout <- lapply(split(clout, clout$id), function(k) sp::Lines(list(sp::Line(sp::coordinates(k))), k$id[1L]))
   lines <- sp::SpatialLines(sclout)
