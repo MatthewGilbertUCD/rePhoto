@@ -280,7 +280,29 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   colnames(matr)=unique(out$Long)
   rownames(matr)=unique(out$Lat)
   cl<-contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
-  shp <- maptools::ContourLines2SLDF(cl)
+  
+  # the following code converts the contourlines into a dataframe, then into a SpatialLinesDataFrame object (shp).
+  # note that this code can be replaced with the maptools::ContourLines2SLDF(cl) function, but has been replaced as maptools is due for retirement
+  # sourced from here: https://stackoverflow.com/questions/24284356/convert-spatialpointsdataframe-to-spatiallinesdataframe-in-r
+  
+  clout=as.data.frame(cl[1])
+  colnames(clout)=c("id","x","y")
+  clout$id=as.character(1)
+  for(i in 1:length(cl)){
+    if(i>1){
+      cltemp=as.data.frame(cl[i])
+      colnames(cltemp)=c("id","x","y")
+      cltemp$id=as.character(i)
+      clout=rbind(clout,cltemp)
+    }
+  }
+  sp::coordinates(clout) <- ~x+y
+  sclout <- lapply(split(clout, clout$id), function(k) sp::Lines(list(sp::Line(sp::coordinates(k))), k$id[1L]))
+  lines <- sp::SpatialLines(sclout)
+  data <- data.frame(id = unique(clout$id))
+  rownames(data) <- data$id
+  shp <- sp::SpatialLinesDataFrame(lines, data)
+
   #Build a SpatialPointsData Frame
   sp::proj4string(shp)<-sp::CRS("+proj=longlat +datum=WGS84")   # this specifies the WGS84 datum for maps, and may not work with as much precision when plotted on older topographic maps (errors as much as 100's of meters)
   # Create a kml file that can be opened in Google Earth or CalTopo
