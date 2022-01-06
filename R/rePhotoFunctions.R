@@ -279,30 +279,33 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   matr=t(matr)
   colnames(matr)=unique(out$Long)
   rownames(matr)=unique(out$Lat)
-  cl<-grDevices::contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
-  
-  # the following code converts the contourlines into a dataframe, then into a Spaltial Lines DataFrame object (shp).
-  # note that this code can be replaced with the maptools::ContourLines2SLDF(cl) function, but has been replaced as maptools is due for retirement
-  # sourced from here: https://stackoverflow.com/questions/24284356/convert-spatialpointsdataframe-to-spatiallinesdataframe-in-r
-  
-  clout=as.data.frame(cl[1])
-  colnames(clout)=c("id","x","y")
-  clout$id=as.character(1)
-  for(i in 1:length(cl)){
-    if(i>1){
-      cltemp=as.data.frame(cl[i])
-      colnames(cltemp)=c("id","x","y")
-      cltemp$id=as.character(i)
-      clout=rbind(clout,cltemp)
+  cL<-grDevices::contourLines(x=unique(out$Long),y=unique(out$Lat),z=matr,levels=c(Thres))
+
+  contourLines2LineList <- function(cL) {
+    n <- length(cL)
+    res <- vector(mode="list", length=n)
+    for (i in 1:n) {
+      crds <- cbind(cL[[i]][[2]], cL[[i]][[3]])
+      res[[i]] <- sp::Line(coords=crds)
     }
+    res
   }
   
-  sp::coordinates(clout) <- ~x+y
-  sclout <- lapply(split(clout, clout$id), function(clout) (sp::Lines(list(sp::Line(sp::coordinates(clout))), clout$id[1])))
-  liness <- sp::SpatialLines(sclout)
-  datas <- data.frame(id = unique(clout$id))
-  rownames(datas) <- datas$id
-  shp <- sp::SpatialLinesDataFrame(liness, datas)
+  
+  cLstack <- tapply(1:length(cL), sapply(cL, function(x) x[[1]]), 
+                    function(x) x, simplify = FALSE)
+  df <- data.frame(level = names(cLstack))
+  m <- length(cLstack)
+  res <- vector(mode = "list", length = m)
+  IDs <- paste("C", 1:m, sep = "_")
+  row.names(df) <- IDs
+  for (i in 1:m) {
+    res[[i]] <- Lines(contourLines2LineList(cL[cLstack[[i]]]), 
+                      ID = IDs[i])
+  }
+  SL <- SpatialLines(res, proj4string = CRS(as.character(NA)))
+  shp <- SpatialLinesDataFrame(SL, data = df)
+  
 
   #Build a SpatialPointsData Frame
   sp::proj4string(shp)<-sp::CRS("+proj=longlat +datum=WGS84")   # this specifies the WGS84 datum for maps, and may not work with as much precision when plotted on older topographic maps (errors as much as 100's of meters)
@@ -317,4 +320,3 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   }
   rgdal::writeOGR(shp, dsn=paste(filename,".kml",sep=""),layer="shp",  driver="KML")
 }
-
