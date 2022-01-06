@@ -300,11 +300,11 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   IDs <- paste("C", 1:m, sep = "_")
   row.names(df) <- IDs
   for (i in 1:m) {
-    res[[i]] <- Lines(contourLines2LineList(cL[cLstack[[i]]]), 
+    res[[i]] <- sp::Lines(contourLines2LineList(cL[cLstack[[i]]]), 
                       ID = IDs[i])
   }
-  SL <- SpatialLines(res, proj4string = CRS(as.character(NA)))
-  shp <- SpatialLinesDataFrame(SL, data = df)
+  SL <- sp::SpatialLines(res, proj4string = sp::CRS(as.character(NA)))
+  shp <- sp::SpatialLinesDataFrame(SL, data = df)
   
 
   #Build a SpatialPointsData Frame
