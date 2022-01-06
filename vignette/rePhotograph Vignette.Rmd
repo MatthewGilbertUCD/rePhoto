@@ -1,16 +1,12 @@
 ---
 title: "rePhoto vignette"
 author: "Matthew Gilbert"
-date: "8/17/2021"
+date: "1/5/2022"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r, include=FALSE}
-source("rePhotoFunctions.R", local = knitr::knit_global())
 ```
 
 ## A demonstration of the functions for the rePhoto R package
@@ -35,11 +31,11 @@ Download and install the rePhoto package from GitHub [here](https://github.com/M
 
 ```{r setup2,results="hide",message=FALSE, warning=FALSE}
 require(devtools)
-install_github("MatthewGilbertUCD/rePhoto")
+install_github("MatthewGilbertUCD/rePhoto",force=TRUE)
 require(rePhoto)
 ```
 
-The *maptools* and *rgdal* R packages and dependency package *sp* are needed to output KML files, but not to run the other functions. If you want to output KML files for viewing in Google Earth, you'll need to install these packages from the CRAN website: [here](https://cran.r-project.org/)  
+The *rgdal* R package and dependency package *sp* are needed to output KML files, but not to run the other functions. If you want to output KML files for viewing in Google Earth, you'll need to install these packages from the CRAN website: [here](https://cran.r-project.org/)  
 
 The Rtools package may be needed for these installations: [here](https://cran.rstudio.com/bin/windows/Rtools/). 
 
@@ -94,7 +90,7 @@ You can create a KML file with a contour showing likely search areas for the cam
 ```{r KML}
 outputKML(out,filename="MyFileName1")
 ```
-The KML file can be opened in Google Earth or CalTopo and compared to satellite photographs or topographic maps. 
+The KML file can be opened in Google Earth/Projects/Open or CalTopo/Import and compared to satellite photographs or topographic maps. 
 
 ### Step 6: Make adjustments to settings
 The functions run well with the default settings, but not always.
@@ -165,7 +161,7 @@ To read more about this technique see:
 Link to paper will be added when published
 
 The following websites have vast databases of landscape photographs to which this technique can be applied:  
-[https://calisphere.org/](https://calisphere.org/) 
+[https://calisphere.org/](https://calisphere.org/)   
 [https://www.loc.gov/collections/](https://www.loc.gov/collections/)  
 [http://vtm.berkeley.edu/#/data/photos](http://vtm.berkeley.edu/#/data/photos)  
 [https://www.nps.gov/media/multimedia-search.htm](https://www.nps.gov/media/multimedia-search.htm)  
