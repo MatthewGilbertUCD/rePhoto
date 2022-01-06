@@ -267,8 +267,8 @@ plot.search.area<-function(data1,out,extrapoints=data.frame(Lat=0,Long=0),title=
 #' @param out the output of rePhotograph()
 #' @param filename the name of the output KML file
 #' @param Thres the threshold for the contour output i.e. the default, Thres = 0.05, includes in the contour all locations that have a out$diffcomb < 0.05. This value can be adjusted based upon the regions shown in plot.search.area()
-#' @details This function requires functions from the sp, rgdal and maptools packages
-#' @import sp, rgdal, maptools
+#' @details This function requires functions from the sp and rgdal packages
+#' @import sp, rgdal
 #' @return A KML file that can be opened in Google Earth, CalTopo etc
 #' @examples see rePhotograph vignette
 outputKML<-function(out,filename="yourfilename",Thres=0.05){
@@ -298,11 +298,11 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   }
   
   sp::coordinates(clout) <- ~x+y
-  sclout <- lapply(split(clout, clout$id), function(k) sp::Lines(list(sp::Line(sp::coordinates(k))), k$id[1L]))
-  lines <- sp::SpatialLines(sclout)
-  data <- data.frame(id = unique(clout$id))
-  rownames(data) <- data$id
-  shp <- sp::SpatialLinesDataFrame(lines, data)
+  sclout <- lapply(split(clout, clout$id), function(clout) sp::Lines(list(sp::Line(sp::coordinates(clout))), clout$id[1L]))
+  liness <- sp::SpatialLines(sclout)
+  datas <- data.frame(id = unique(clout$id))
+  rownames(data) <- datas$id
+  shp <- sp::SpatialLinesDataFrame(liness, datas)
 
   #Build a SpatialPointsData Frame
   sp::proj4string(shp)<-sp::CRS("+proj=longlat +datum=WGS84")   # this specifies the WGS84 datum for maps, and may not work with as much precision when plotted on older topographic maps (errors as much as 100's of meters)
