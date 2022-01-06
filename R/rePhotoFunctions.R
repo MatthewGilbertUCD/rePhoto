@@ -301,7 +301,7 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   sclout <- lapply(split(clout, clout$id), function(clout) sp::Lines(list(sp::Line(sp::coordinates(clout))), clout$id[1L]))
   liness <- sp::SpatialLines(sclout)
   datas <- data.frame(id = unique(clout$id))
-  rownames(data) <- datas$id
+  rownames(datas) <- datas$id
   shp <- sp::SpatialLinesDataFrame(liness, datas)
 
   #Build a SpatialPointsData Frame
