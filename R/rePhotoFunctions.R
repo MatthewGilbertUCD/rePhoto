@@ -298,7 +298,7 @@ outputKML<-function(out,filename="yourfilename",Thres=0.05){
   }
   
   sp::coordinates(clout) <- ~x+y
-  sclout <- lapply(split(clout, clout$id), function(clout) (sp::Lines(list(sp::Line(sp::coordinates(clout))), clout$id[1L])))
+  sclout <- lapply(split(clout, clout$id), function(clout) (sp::Lines(list(sp::Line(sp::coordinates(clout))), clout$id[1])))
   liness <- sp::SpatialLines(sclout)
   datas <- data.frame(id = unique(clout$id))
   rownames(datas) <- datas$id
